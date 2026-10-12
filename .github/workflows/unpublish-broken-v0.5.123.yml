@@ -1,0 +1,23 @@
+name: Hide broken PC Agent 0.5.123
+on:
+  push:
+    paths:
+      - '.github/workflows/unpublish-broken-v0.5.123.yml'
+permissions:
+  contents: write
+jobs:
+  hide-release:
+    if: github.repository == 'Paketik2010/pc-agent-releases'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Unpublish only release 0.5.123
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh api -X PATCH "repos/${GITHUB_REPOSITORY}/releases/410775099" -F draft=true --jq '{tag_name: .tag_name, draft: .draft}'
+      - name: Check 0.5.122 is latest
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          test "$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name)" = "v0.5.122"
